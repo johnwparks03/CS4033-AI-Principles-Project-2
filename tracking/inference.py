@@ -394,7 +394,18 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        if self.total() != 1:
+            self.normalize()
+        sortedItems = sorted(self.items())
+        itemDistribution = [i[1] for i in sortedItems]
+        itemValues = [i[0] for i in sortedItems]
+        randomChoice = random.random()
+        i = 0
+        total = itemDistribution[0]
+        while randomChoice > total:
+            i += 1
+            total += itemDistribution[i]
+        return itemValues[i]
         "*** END YOUR CODE HERE ***"
 
 
@@ -696,7 +707,20 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        pacmanPos = gameState.getPacmanPosition()
+        jailPos = self.getJailPosition()
+        probabilityDist = DiscreteDistribution()
+        for particle in self.particles:
+            prob = self.getObservationProb(observation, pacmanPos, particle, jailPos)
+            probabilityDist[particle] += prob
+        if probabilityDist.total() == 0:
+            self.initializeUniformly(gameState)
+        else:
+            probabilityDist.normalize()
+            self.beliefs = probabilityDist
+            for i in range(self.numParticles):
+                sample = probabilityDist.sample()
+                self.particles[i] = sample
         "*** END YOUR CODE HERE ***"
     
     ########### ########### ###########
